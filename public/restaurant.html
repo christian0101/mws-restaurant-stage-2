@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8">
+  <!-- Normalize.css for better cross-browser consistency -->
+  <link rel="stylesheet" src="//cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.css" />
+  <!-- Main CSS file -->
+  <link rel="stylesheet" href="css/styles.css" type="text/css">
+  <link rel="shortcut icon" href="favicon.ico" />
+  <title>Restaurant Info</title>
+</head>
+
+<body class="inside">
+  <!-- Beginning header -->
+  <header>
+    <!-- Beginning nav -->
+    <nav>
+      <h1><a href="./"><img id="logo" alt="spoon and a fork in a circle, logo" src="img/logo.svg" /><br>Restaurant Reviews</a></h1>
+    </nav>
+    <!-- Beginning breadcrumb -->
+    <ul role="navigation" aria-label="Breadcrumb" id="breadcrumb" >
+      <li><a href="./">Home</a></li>
+    </ul>
+    <!-- End breadcrumb -->
+    <!-- End nav -->
+  </header>
+  <!-- End header -->
+
+  <!-- Beginning main -->
+  <main id="maincontent">
+    <!-- Beginning map -->
+    <aside>
+      <section title="map with the locationo the selected resturant" id="map-container">
+        <div role="application" id="map"></div>
+      </section>
+    </aside>
+    <!-- End map -->
+    <!-- Beginning restaurant -->
+    <section id="restaurant-container">
+      <h2 id="restaurant-name"></h1>
+      <p id="restaurant-cuisine"></p>
+      <picture id="picure-element">
+        <img id="restaurant-img" />
+      </picture>
+      <p id="restaurant-address"></p>
+      <table id="restaurant-hours"></table>
+    </section>
+    <!-- end restaurant -->
+    <!-- Beginning reviews -->
+    <section id="reviews-container">
+      <ul id="reviews-list"></ul>
+    </section>
+    <!-- End reviews -->
+  </main>
+  <!-- End main -->
+
+  <!-- Beginning footer -->
+  <footer id="footer">
+    Copyright (c) 2017 <a href="./"><strong>Restaurant Reviews</strong></a> All Rights Reserved.
+  </footer>
+  <!-- End footer -->
+
+  <div class="toast-dismissed" tabindex="-1" id="toast">
+    <div class="toast-content">New version available
+      <button id="refreshsw" class="unbutton">Refresh</button>
+      <button onclick="DBHelper.dismissToast()" class="unbutton">Dismiss</button>
+    </div>
+  </div>
+
+  <!-- Beginning scripts -->
+  <!-- Database helpers -->
+  <script type="text/javascript" src="js/dbhelper.js"></script>
+  <!-- Main javascript file -->
+  <script type="text/javascript" src="js/restaurant_info.js"></script>
+  <!-- Google Maps -->
+  <script id="API" async defer></script>
+  <script type="application/javascript" charset="utf-8" src="js/private.js"></script>
+  <!-- End scripts -->
+
+</body>
+
+</html>
