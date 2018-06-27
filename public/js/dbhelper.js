@@ -8,27 +8,20 @@ class DBHelper {
    * Change this to restaurants.json file location on your server.
    */
   static get DATABASE_URL() {
-    const port = 8000 // Change this to your server port
-    return `data/restaurants.json`;
+    const port = 1337 // Change this to your server port
+    return `http://localhost:${port}/restaurants`;
   }
 
   /**
    * Fetch all restaurants.
+   * Using Fetch API.
+   * @param callback the callback function
    */
   static fetchRestaurants(callback) {
-    let xhr = new XMLHttpRequest();
-    xhr.open('GET', DBHelper.DATABASE_URL);
-    xhr.onload = () => {
-      if (xhr.status === 200) { // Got a success response from server!
-        const json = JSON.parse(xhr.responseText);
-        const restaurants = json.restaurants;
-        callback(null, restaurants);
-      } else { // Oops!. Got an error from server.
-        const error = (`Request failed. Returned status of ${xhr.status}`);
-        callback(error, null);
-      }
-    };
-    xhr.send();
+    fetch(DBHelper.DATABASE_URL)
+    .then(response => response.json())
+    .then(data => callback(null, data))
+    .catch(e => callback(e, null));
   }
 
   /**
@@ -156,8 +149,12 @@ class DBHelper {
   /**
    * Restaurant image URL.
    */
-  static imageUrlForRestaurant(restaurant, index = 1) {
-    return (`imgs/${restaurant.photographs[index]}`);
+  static imageUrlForRestaurant(restaurant) {
+    if (restaurant && restaurant.photograph) {
+      return (`imgs/${restaurant.photograph}.jpg`);
+    } else {
+      return null;
+    }
   }
 
   /**
@@ -187,6 +184,24 @@ class DBHelper {
       animation: google.maps.Animation.DROP}
     );
     return marker;
+  }
+
+  /**
+   * Create database for restuarants.
+   */
+  static openDatabase() {
+    // If the browser doesn't support service worker,
+    // we don't care about having a database
+    if (!navigator.serviceWorker) {
+      return Promise.resolve();
+    }
+
+    return idb.open('resturantsData', 1, function(upgradeDb) {
+      var store = upgradeDb.createObjectStore('restuarnats', {
+        keyPath: 'name'
+      });
+      store.createIndex('name', 'name');
+    });
   }
 
   /**

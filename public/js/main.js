@@ -8,6 +8,7 @@ var markers = []
  * Fetch data as soon as the page is loaded.
  */
 document.addEventListener('DOMContentLoaded', (event) => {
+  DBHelper.openDatabase();
   fetchNeighborhoods();
   fetchCuisines();
   PrivateContent.addMap();
@@ -102,11 +103,21 @@ updateRestaurants = () => {
   DBHelper.fetchRestaurantByCuisineAndNeighborhood(cuisine, neighborhood, (error, restaurants) => {
     if (error) { // Got an error!
       console.error(error);
+      noRestuarants();
     } else {
       resetRestaurants(restaurants);
       fillRestaurantsHTML();
     }
   })
+}
+
+/**
+ * No restaurants found in the database.
+ */
+noRestuarants = () => {
+  const ul = document.getElementById('restaurants-list');
+  ul.insertAdjacentHTML('beforeend', `<p class="network-warning"><span>Oh no! There was an error making a request for restuarnats.</span>
+  <span>No restuarnats found!</span></p>`);
 }
 
 /**
@@ -141,11 +152,19 @@ fillRestaurantsHTML = (restaurants = self.restaurants) => {
 createRestaurantHTML = (restaurant) => {
   const li = document.createElement('li');
 
-  const image = document.createElement('img');
-  image.className = 'restaurant-img';
-  image.src = DBHelper.imageUrlForRestaurant(restaurant);
-  image.alt = DBHelper.getPhotoDescription(restaurant);
-  li.append(image);
+  const imgSrc = DBHelper.imageUrlForRestaurant(restaurant);
+  if (imgSrc) {
+    const image = document.createElement('img');
+    image.className = 'restaurant-img';
+    image.src = imgSrc;
+    image.alt = DBHelper.getPhotoDescription(restaurant);
+    li.append(image);
+  } else {
+    const image = document.createElement('div');
+    image.alt = "No image found!";
+    image.innerHTML = "No image found!";
+    li.append(image);
+  }
 
   const name = document.createElement('h3');
   name.innerHTML = restaurant.name;

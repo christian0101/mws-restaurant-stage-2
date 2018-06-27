@@ -61,6 +61,18 @@ object, video {
   text-transform: uppercase;
 }
 
+.network-warning {
+  font-size: 18pt !important;
+  color: red;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  margin-bottom: 15px !important;
+}
+
+.network-warning span {
+  display: block;
+}
+
 .toast {
   color: #fff;
   background: #323232;
