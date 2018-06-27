@@ -112,12 +112,12 @@ updateRestaurants = () => {
 }
 
 /**
- * No restaurants found in the database.
+ * No restaurants found.
  */
 noRestuarants = () => {
   const ul = document.getElementById('restaurants-list');
   ul.insertAdjacentHTML('beforeend', `<p class="network-warning"><span>Oh no! There was an error making a request for restuarnats.</span>
-  <span>No restuarnats found!</span></p>`);
+  <span>No restuarnats to display!</span></p>`);
 }
 
 /**

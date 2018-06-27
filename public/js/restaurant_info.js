@@ -46,15 +46,28 @@ fetchRestaurantFromURL = (callback) => {
       self.restaurant = restaurant;
       if (!restaurant) {
         console.error(error);
-        const name = document.getElementById('restaurant-name');
-        name.innerHTML = error;
-        name.title = error;
+        noRestuarant(error);
         return;
       }
       fillRestaurantHTML();
       callback(null, restaurant)
     });
   }
+}
+
+/**
+ * Restaurant not found.
+ */
+noRestuarant = (err) => {
+  const breadcrumb = document.getElementById('breadcrumb');
+  const li = document.createElement('li');
+  li.setAttribute('aria-current', err)
+  li.innerHTML = err;
+  breadcrumb.appendChild(li);
+
+  const name = document.getElementById('restaurant-name');
+  name.innerHTML = err;
+  name.title = err;
 }
 
 /**

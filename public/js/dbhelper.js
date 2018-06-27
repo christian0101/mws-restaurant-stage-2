@@ -32,7 +32,7 @@ class DBHelper {
     fetch(`${DBHelper.DATABASE_URL}/${id}`)
     .then(response => response.json())
     .then(data => callback(null, data))
-    .catch(e => callback('Restaurant does not exist', null));
+    .catch(e => callback('Restaurant does not exist or Connection issues', null));
   }
 
   /**
