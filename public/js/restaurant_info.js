@@ -46,6 +46,9 @@ fetchRestaurantFromURL = (callback) => {
       self.restaurant = restaurant;
       if (!restaurant) {
         console.error(error);
+        const name = document.getElementById('restaurant-name');
+        name.innerHTML = error;
+        name.title = error;
         return;
       }
       fillRestaurantHTML();
