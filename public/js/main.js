@@ -8,11 +8,11 @@ var markers = []
  * Fetch data as soon as the page is loaded.
  */
 document.addEventListener('DOMContentLoaded', (event) => {
-  DBHelper.openDatabase();
+  DBHelper.registerServiceWorker();
+  this._dbPromise = DBHelper.openDatabase();
   fetchNeighborhoods();
   fetchCuisines();
   PrivateContent.addMap();
-  DBHelper.registerServiceWorker();
 });
 
 /**
@@ -84,7 +84,25 @@ window.initMap = () => {
     scrollwheel: false
   });
 
-  updateRestaurants();
+  this._showCachedRestaurants().then(function() {
+    updateRestaurants();
+  });
+}
+
+_showCachedRestaurants = () => {
+  return this._dbPromise.then(function(db) {
+    // if we're already showing posts, eg shift-refresh
+    // or the very first load, there's no point fetching
+    // posts from IDB
+    if (!db) return;
+
+    var index = db.transaction('restuarnats').objectStore('restuarnats');
+
+    return index.getAll().then(function(restaurants) {
+      resetRestaurants(restaurants);
+      fillRestaurantsHTML();
+    });
+  });
 }
 
 /**
@@ -103,9 +121,10 @@ updateRestaurants = () => {
   DBHelper.fetchRestaurantByCuisineAndNeighborhood(cuisine, neighborhood, (error, restaurants) => {
     if (error) { // Got an error!
       console.error(error);
-      noRestuarants();
+      networkWarning();
     } else {
       resetRestaurants(restaurants);
+      _updateDB();
       fillRestaurantsHTML();
     }
   })
@@ -114,10 +133,9 @@ updateRestaurants = () => {
 /**
  * No restaurants found.
  */
-noRestuarants = () => {
+networkWarning = () => {
   const ul = document.getElementById('restaurants-list');
-  ul.insertAdjacentHTML('beforeend', `<p class="network-warning"><span>Oh no! There was an error making a request for restuarnats.</span>
-  <span>No restuarnats to display!</span></p>`);
+  ul.insertAdjacentHTML('beforeend', `<p class="network-warning"><span>Oh no! There was an error making a request for restuarnats.</span></p>`);
 }
 
 /**
@@ -133,6 +151,22 @@ resetRestaurants = (restaurants) => {
   self.markers.forEach(m => m.setMap(null));
   self.markers = [];
   self.restaurants = restaurants;
+}
+
+/**
+ * Add new restaurants from network.
+ */
+_updateDB = (restaurants = self.restaurants) => {
+  this._dbPromise.then(function(db) {
+    if (!db) return;
+
+    var tx = db.transaction('restuarnats', 'readwrite');
+    var store = tx.objectStore('restuarnats');
+
+    restaurants.forEach(restaurant => {
+      store.put(restaurant);
+    });
+  });
 }
 
 /**

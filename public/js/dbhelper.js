@@ -158,7 +158,7 @@ class DBHelper {
     let srcSet = "";
 
     indexes.forEach(index => {
-      srcSet += `imgs/${restaurant.photographs[index]} ${weights[index]}, `;
+      srcSet += `imgs/${restaurant.photographs} ${weights[index]}, `;
     });
 
     return srcSet;
@@ -190,9 +190,9 @@ class DBHelper {
 
     return idb.open('resturantsData', 1, function(upgradeDb) {
       var store = upgradeDb.createObjectStore('restuarnats', {
-        keyPath: 'name'
+        keyPath: 'id'
       });
-      store.createIndex('name', 'name');
+      store.createIndex('creation date', 'createdAt');
     });
   }
 
