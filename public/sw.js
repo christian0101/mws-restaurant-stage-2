@@ -1,8 +1,11 @@
 const staticCacheName = 'mws-static-v1';
+const contentImgsCache = 'mws-content-imgs';
 
-const allCaches = [
-  staticCacheName
+var allCaches = [
+  staticCacheName,
+  contentImgsCache
 ];
+
 
 /**
 * Install service worker.
@@ -17,42 +20,27 @@ self.addEventListener('install', function(event) {
         './js/main.js',
         './js/restaurant_info.js',
         './js/private.js',
+        './js/idb.js',
         './js/dbhelper.js',
         './data/restaurants.json',
         './favicon.ico',
-        './imgs/1-800_small_1x.jpg',
-        './imgs/1-1600_large_2x.jpg',
-        './imgs/1.jpg',
-        './imgs/2-800_small_1x.jpg',
-        './imgs/2-1600_large_2x.jpg',
-        './imgs/2.jpg',
-        './imgs/3-800_small_1x.jpg',
-        './imgs/3-1600_large_2x.jpg',
-        './imgs/3.jpg',
-        './imgs/4-800_small_1x.jpg',
-        './imgs/4-1600_large_2x.jpg',
-        './imgs/4.jpg',
-        './imgs/5-800_small_1x.jpg',
-        './imgs/5-1600_large_2x.jpg',
-        './imgs/5.jpg',
-        './imgs/6-800_small_1x.jpg',
-        './imgs/6-1600_large_2x.jpg',
-        './imgs/6.jpg',
-        './imgs/7-800_small_1x.jpg',
-        './imgs/7-1600_large_2x.jpg',
-        './imgs/7.jpg',
-        './imgs/8-800_small_1x.jpg',
-        './imgs/8-1600_large_2x.jpg',
-        './imgs/8.jpg',
-        './imgs/9-800_small_1x.jpg',
-        './imgs/9-1600_large_2x.jpg',
-        './imgs/9.jpg',
-        './imgs/10-800_small_1x.jpg',
-        './imgs/10-1600_large_2x.jpg',
-        './imgs/10.jpg',
-        './imgs/logo.svg',
         'https://fonts.googleapis.com/css?family=Roboto:300,400,500,700',
         'https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.css'
+      ]);
+    }),
+    caches.open(contentImgsCache).then(function(cache) {
+      cache.addAll([
+        './imgs/1.jpg',
+        './imgs/2.jpg',
+        './imgs/3.jpg',
+        './imgs/4.jpg',
+        './imgs/5.jpg',
+        './imgs/6.jpg',
+        './imgs/7.jpg',
+        './imgs/8.jpg',
+        './imgs/9.jpg',
+        './imgs/10.jpg',
+        './imgs/logo.svg'
       ]);
     })
   );
@@ -94,25 +82,25 @@ self.addEventListener('fetch', function(event) {
   const index = event.request.url + "index.html";
 
   if (requestUrl.origin === location.origin) {
-   if (requestUrl.pathname === './') {
-     event.respondWith(servePage(event.request, index));
-     return;
-   }
-   if (requestUrl.pathname.endsWith("restaurant.html")) {
-     event.respondWith(serveRestuarantPage(event.request));
-     return;
-   }
+    if (requestUrl.pathname === '/') {
+      event.respondWith(servePage(event.request, index));
+      return;
+    }
+    if (requestUrl.pathname.endsWith("restaurant.html")) {
+      event.respondWith(serveRestuarantPage(event.request));
+      return;
+    }
+    if (requestUrl.pathname.startsWith('/imgs/')) {
+      event.respondWith(servePhoto(event.request));
+      return;
+    }
+  }
 
-   // if cache was removed update it
-   event.respondWith(servePage(event.request, requestUrl.href));
-   return;
-}
-
- event.respondWith(
+  event.respondWith(
    caches.match(event.request).then(function(response) {
      return response || fetch(event.request);
    })
- );
+  );
 });
 
 /**
@@ -137,6 +125,26 @@ function servePage(request, customUrl) {
      return response || networkFetch;
    });
  });
+}
+
+
+/**
+ * Serve a photo with custom url that should match an existing cached photo,
+ * fetch from network oherwise.
+ */
+function servePhoto(request) {
+  var storageUrl = request.url.replace(/-\d+px\.jpg$/, '');
+
+  return caches.open(contentImgsCache).then(function(cache) {
+    return cache.match(storageUrl).then(function(response) {
+      if (response) return response;
+
+      return fetch(request).then(function(networkResponse) {
+        cache.put(storageUrl, networkResponse.clone());
+        return networkResponse;
+      });
+    });
+  });
 }
 
 /**
