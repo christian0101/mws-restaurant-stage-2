@@ -192,7 +192,7 @@ class DBHelper {
       var store = upgradeDb.createObjectStore('restuarnats', {
         keyPath: 'id'
       });
-      store.createIndex('creation date', 'createdAt');
+      store.createIndex('by-date', 'createdAt');
     });
   }
 
