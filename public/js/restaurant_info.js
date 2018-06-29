@@ -5,8 +5,9 @@ var map;
  * Fetch data as soon as the page is loaded.
  */
 document.addEventListener('DOMContentLoaded', (event) => {
-  PrivateContent.addMap();
   DBHelper.registerServiceWorker();
+  this._dbPromise = DBHelper.openDatabase();
+  PrivateContent.addMap();
 });
 
 
@@ -42,17 +43,39 @@ fetchRestaurantFromURL = (callback) => {
     error = 'No restaurant id in URL'
     callback(error, null);
   } else {
-    DBHelper.fetchRestaurantById(id, (error, restaurant) => {
-      self.restaurant = restaurant;
-      if (!restaurant) {
-        console.error(error);
-        noRestuarant(error);
-        return;
-      }
-      fillRestaurantHTML();
-      callback(null, restaurant)
+    this._showCachedRestaurant(id).catch(err => {
+      DBHelper.fetchRestaurantById(id, (error, restaurant) => {
+        self.restaurant = restaurant;
+        if (!restaurant) {
+          console.error(error);
+          noRestuarant(error);
+          return;
+        }
+        fillRestaurantHTML();
+        callback(null, restaurant)
+      });
     });
   }
+}
+
+/**
+ * Display resturant from idb.
+ */
+_showCachedRestaurant = (id) => {
+  return this._dbPromise.then(function(db) {
+    // if we're already showing posts, eg shift-refresh
+    // or the very first load, there's no point fetching
+    // posts from IDB
+    if (!db) return;
+
+    let restaurnats = db.transaction('restaurants').objectStore('restaurants');
+    const key = parseInt(id);
+
+    return restaurnats.get(key).then(function(item) {
+      self.restaurant = item;
+      fillRestaurantHTML();
+    });
+  });
 }
 
 /**

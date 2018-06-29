@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
   fetchNeighborhoods();
   fetchCuisines();
   PrivateContent.addMap();
+  this._toastsView = new Toast();
 });
 
 /**
@@ -86,21 +87,17 @@ window.initMap = () => {
 
   this._showCachedRestaurants().then(function() {
     updateRestaurants();
-  });
+  })
 }
 
 _showCachedRestaurants = () => {
   return this._dbPromise.then(function(db) {
-    // if we're already showing posts, eg shift-refresh
-    // or the very first load, there's no point fetching
-    // posts from IDB
     if (!db) return;
 
-    var index = db.transaction('restuarnats').objectStore('restuarnats');
+    let dbRestaurants = db.transaction('restaurants').objectStore('restaurants');
 
-    return index.getAll().then(function(restaurants) {
-      resetRestaurants(restaurants);
-      fillRestaurantsHTML();
+    return dbRestaurants.getAll().then(function(content) {
+      resetRestaurants(content);
     });
   });
 }
@@ -134,8 +131,8 @@ updateRestaurants = () => {
  * No restaurants found.
  */
 networkWarning = () => {
-  const ul = document.getElementById('restaurants-list');
-  ul.insertAdjacentHTML('beforeend', `<p class="network-warning"><span>Oh no! There was an error making a request for restuarnats.</span></p>`);
+  const networkWarning = this._toastsView.create(
+    "Oh no! There was an error making a request for restuarnats.");
 }
 
 /**
@@ -160,8 +157,8 @@ _updateDB = (restaurants = self.restaurants) => {
   this._dbPromise.then(function(db) {
     if (!db) return;
 
-    var tx = db.transaction('restuarnats', 'readwrite');
-    var store = tx.objectStore('restuarnats');
+    var tx = db.transaction('restaurants', 'readwrite');
+    var store = tx.objectStore('restaurants');
 
     restaurants.forEach(restaurant => {
       store.put(restaurant);
@@ -175,7 +172,6 @@ _updateDB = (restaurants = self.restaurants) => {
       cursor.delete();
       return cursor.continue().then(deleteRest);
     });
-
   });
 }
 
@@ -197,18 +193,11 @@ createRestaurantHTML = (restaurant) => {
   const li = document.createElement('li');
 
   const imgSrc = DBHelper.imageUrlForRestaurant(restaurant);
-  if (imgSrc) {
-    const image = document.createElement('img');
-    image.className = 'restaurant-img';
-    image.src = imgSrc;
-    image.alt = DBHelper.getPhotoDescription(restaurant);
-    li.append(image);
-  } else {
-    const image = document.createElement('div');
-    image.alt = "No image found!";
-    image.innerHTML = "No image found!";
-    li.append(image);
-  }
+  const image = document.createElement('img');
+  image.className = 'restaurant-img';
+  image.src = imgSrc;
+  image.alt = DBHelper.getPhotoDescription(restaurant);
+  li.append(image);
 
   const name = document.createElement('h3');
   name.innerHTML = restaurant.name;

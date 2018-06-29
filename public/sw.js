@@ -22,7 +22,6 @@ self.addEventListener('install', function(event) {
         './js/private.js',
         './js/idb.js',
         './js/dbhelper.js',
-        './data/restaurants.json',
         './favicon.ico',
         'https://fonts.googleapis.com/css?family=Roboto:300,400,500,700',
         'https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.css'
@@ -92,7 +91,7 @@ self.addEventListener('fetch', function(event) {
     }
     if (requestUrl.pathname.startsWith('/imgs/')) {
       event.respondWith(servePhoto(event.request));
-      return;
+        return;
     }
   }
 
@@ -104,7 +103,7 @@ self.addEventListener('fetch', function(event) {
 });
 
 /**
-* Return the retuarant html template, ignoring id
+* Return the retuarant html template, ignoring id.
 */
 function serveRestuarantPage(request, url) {
   var storageUrl = request.url.replace(/\?id=\d/, '');

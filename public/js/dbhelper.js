@@ -145,7 +145,7 @@ class DBHelper {
     if (restaurant && restaurant.photograph) {
       return (`imgs/${restaurant.photograph}.jpg`);
     } else {
-      return null;
+      return (`imgs/no-pictures.svg`);
     }
   }
 
@@ -188,8 +188,8 @@ class DBHelper {
       return Promise.resolve();
     }
 
-    return idb.open('resturantsData', 1, function(upgradeDb) {
-      var store = upgradeDb.createObjectStore('restuarnats', {
+    return idb.open('restaurnatsData', 1, function(upgradeDb) {
+      var store = upgradeDb.createObjectStore('restaurants', {
         keyPath: 'id'
       });
       store.createIndex('by-date', 'createdAt');
@@ -234,6 +234,9 @@ class DBHelper {
      });
    }
 
+   /**
+    * service worker
+    */
    static _trackInstalling(worker) {
      worker.addEventListener('statechange', function() {
        if (worker.state == 'installed') {
@@ -242,23 +245,18 @@ class DBHelper {
      });
    }
 
+   /**
+    * service worker
+    */
    static _updateReady(worker) {
-     const toast = document.getElementById('toast');
+     this._toastsView = new Toast();
+     const toast = this._toastsView.create("New version available", {
+       buttons: ['refresh', 'dismiss']
+     });
 
-     toast.classList.remove('toast-dismissed');
-     toast.classList.add('toast');
-     toast.focus();
-
-     const refresh = document.getElementById('refreshsw');
-     refresh.addEventListener('click', function() {
+     toast.answer.then(function(answer) {
+       if (answer != 'refresh') return;
        worker.postMessage({action: 'skipWaiting'});
      });
-   }
-
-   static dismissToast() {
-     const toast = document.getElementById('toast');
-
-     toast.classList.remove('toast');
-     toast.classList.add('toast-dismissed');
    }
 }

@@ -54,7 +54,7 @@ object, video {
 #footer {
   background-color: #444;
   color: #b1b1b1;
-  font-size: 8pt;
+  font-size: 9pt;
   letter-spacing: 1px;
   padding: 25px;
   text-align: center;
@@ -78,12 +78,12 @@ object, video {
   background: #323232;
   padding: 10px 0;
   padding-right: 0;
-  opacity: 1;
   position: fixed;
   width: 100%;
   text-align: center;
   border-radius: 2px;
   bottom: 0;
+  opacity: 1;
 }
 
 @media screen and (min-width: 700px) {
@@ -93,6 +93,7 @@ object, video {
 }
 
 .toast-dismissed {
+  opacity: 0;
   display: none;
 }
 
@@ -101,13 +102,10 @@ object, video {
   margin: 0;
   padding: 16px;
   text-transform: uppercase;
+  cursor: pointer;
 }
 
-.toast button:last-child {
-  padding-left: 0;
-}
-
-.toast button:focus {
+.toast button:hover {
   color: #fff;
 }
 
@@ -380,7 +378,7 @@ img#logo {
 	box-shadow: 1px 4px 5px #E4E4E4;
   color: #fff;
   display: inline-block;
-  font-size: 10pt;
+  font-size: 11pt;
   margin: 15px 15px 10px 15px;
   padding: 8px 30px 10px;
   text-align: center;

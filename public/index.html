@@ -4,6 +4,7 @@
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" src="//cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.css" />
+  <link rel="preload" href="css/styles.css" as="style">
   <link rel="stylesheet" href="css/styles.css">
   <link rel="shortcut icon" href="favicon.ico" />
   <meta charset="utf-8">
@@ -41,6 +42,8 @@
   <!-- Beginning scripts -->
   <!-- Database helpers -->
   <script type="application/javascript" charset="utf-8" src="js/dbhelper.js"></script>
+  <!-- Toast notifications -->
+  <script type="application/javascript" charset="utf-8" src="js/Toast.js"></script>
   <!-- Main javascript file -->
   <script type="application/javascript" charset="utf-8" src="js/main.js"></script>
   <!-- Google Maps -->
@@ -55,13 +58,6 @@
   <footer id="footer">
     Copyright (c) 2017 <a href="./"><strong>Restaurant Reviews</strong></a> All Rights Reserved.
   </footer>
-
-  <div class="toast-dismissed" id="toast" tabindex="-1">
-    <div class="toast-content">New version available
-      <button id="refreshsw" class="unbutton">Refresh</button>
-      <button onclick="DBHelper.dismissToast()" class="unbutton">Dismiss</button>
-    </div>
-  </div>
 
 </body>
 
