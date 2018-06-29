@@ -141,9 +141,10 @@ class DBHelper {
   /**
    * Restaurant image URL.
    */
-  static imageUrlForRestaurant(restaurant) {
+  static imageUrlForRestaurant(restaurant, low = false) {
     if (restaurant && restaurant.photograph) {
-      return (`imgs/${restaurant.photograph}.jpg`);
+      return (low) ? (`imgs/${restaurant.photograph}-low.jpg`) :
+                    (`imgs/${restaurant.photograph}.jpg`);
     } else {
       return (`imgs/no-pictures.svg`);
     }
@@ -152,16 +153,16 @@ class DBHelper {
   /**
    * Restaurant image srcset URLs.
    */
-  static imageSRCSetUrlsForRestaurant(restaurant, indexes) {
-    const weights = {0: "800w", 1: "500w", 2: "1600w"};
+  static imageSRCSetUrlsForRestaurant(restaurant, opts) {
+    let images = [];
 
-    let srcSet = "";
+    if (restaurant && restaurant.photograph) {
+      opts.forEach(prop => {
+        images.push(`imgs/${restaurant.photograph}-${prop}.jpg ${prop}`);
+      });
+    }
 
-    indexes.forEach(index => {
-      srcSet += `imgs/${restaurant.photographs} ${weights[index]}, `;
-    });
-
-    return srcSet;
+    return images.join(', ');
   }
 
   /**

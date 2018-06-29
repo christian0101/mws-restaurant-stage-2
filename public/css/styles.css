@@ -61,35 +61,17 @@ object, video {
   text-transform: uppercase;
 }
 
-.network-warning {
-  font-size: 18pt !important;
-  color: red;
-  margin-left: auto !important;
-  margin-right: auto !important;
-  margin-bottom: 15px !important;
-}
-
-.network-warning span {
-  display: block;
-}
-
 .toast {
   color: #fff;
   background: #323232;
   padding: 10px 0;
   padding-right: 0;
+  font-size: 16px;
   position: fixed;
   width: 100%;
   text-align: center;
-  border-radius: 2px;
   bottom: 0;
   opacity: 1;
-}
-
-@media screen and (min-width: 700px) {
-  .toast {
-    font-size: 16px;
-  }
 }
 
 .toast-dismissed {
@@ -351,7 +333,6 @@ img#logo {
 }
 
 #restaurants-list .restaurant-img {
-  background-color: #ccc;
   display: block;
   margin: auto;
   max-width: 100%;
@@ -383,6 +364,7 @@ img#logo {
   padding: 8px 30px 10px;
   text-align: center;
   text-decoration: none;
+  font-weight: 800;
   text-transform: uppercase;
 }
 

@@ -39,7 +39,8 @@ self.addEventListener('install', function(event) {
         './imgs/8.jpg',
         './imgs/9.jpg',
         './imgs/10.jpg',
-        './imgs/logo.svg'
+        './imgs/logo.svg',
+        './imgs/no-pictures.svg'
       ]);
     })
   );
@@ -91,7 +92,7 @@ self.addEventListener('fetch', function(event) {
     }
     if (requestUrl.pathname.startsWith('/imgs/')) {
       event.respondWith(servePhoto(event.request));
-        return;
+      return;
     }
   }
 
@@ -132,8 +133,8 @@ function servePage(request, customUrl) {
  * fetch from network oherwise.
  */
 function servePhoto(request) {
-  var storageUrl = request.url.replace(/-\d+px\.jpg$/, '');
-
+  var storageUrl = request.url.replace(/-\dx/, '');
+  
   return caches.open(contentImgsCache).then(function(cache) {
     return cache.match(storageUrl).then(function(response) {
       if (response) return response;

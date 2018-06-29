@@ -12,7 +12,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
   this._dbPromise = DBHelper.openDatabase();
   fetchNeighborhoods();
   fetchCuisines();
-  PrivateContent.addMap();
   this._toastsView = new Toast();
 });
 
@@ -86,8 +85,10 @@ window.initMap = () => {
   });
 
   this._showCachedRestaurants().then(function() {
+    lazyLoad();
     updateRestaurants();
   })
+  //updateRestaurants();
 }
 
 _showCachedRestaurants = () => {
@@ -98,6 +99,7 @@ _showCachedRestaurants = () => {
 
     return dbRestaurants.getAll().then(function(content) {
       resetRestaurants(content);
+      fillRestaurantsHTML();
     });
   });
 }
@@ -123,6 +125,7 @@ updateRestaurants = () => {
       resetRestaurants(restaurants);
       _updateDB();
       fillRestaurantsHTML();
+      lazyLoad();
     }
   })
 }
@@ -192,11 +195,15 @@ fillRestaurantsHTML = (restaurants = self.restaurants) => {
 createRestaurantHTML = (restaurant) => {
   const li = document.createElement('li');
 
-  const imgSrc = DBHelper.imageUrlForRestaurant(restaurant);
+  const imgSrc = DBHelper.imageUrlForRestaurant(restaurant, true);
   const image = document.createElement('img');
   image.className = 'restaurant-img';
+  image.classList.add('lazy');
   image.src = imgSrc;
-  image.alt = DBHelper.getPhotoDescription(restaurant);
+  image.setAttribute('data-src', DBHelper.imageUrlForRestaurant(restaurant));
+  image.setAttribute('data-srcset', DBHelper.imageSRCSetUrlsForRestaurant(restaurant, ['1x', '2x']));
+  image.alt = (restaurant.photograph) ? DBHelper.getPhotoDescription(restaurant) :
+  'no picture found';
   li.append(image);
 
   const name = document.createElement('h3');
@@ -221,6 +228,47 @@ createRestaurantHTML = (restaurant) => {
   li.append(more)
 
   return li
+}
+
+/**
+ * Lazy loading, using event handlers.
+ * https://developers.google.com/web/fundamentals/performance/lazy-loading-guidance/images-and-video/
+ */
+lazyLoad = () => {
+  let lazyImages = [].slice.call(document.querySelectorAll("img.lazy"));
+  let active = false;
+
+  const lazyLoad = function() {
+    if (active === false) {
+      active = true;
+
+      setTimeout(function() {
+        lazyImages.forEach(function(lazyImage) {
+          if ((lazyImage.getBoundingClientRect().top <= window.innerHeight && lazyImage.getBoundingClientRect().bottom >= 0) && getComputedStyle(lazyImage).display !== "none") {
+            lazyImage.src = lazyImage.dataset.src;
+            lazyImage.srcset = lazyImage.dataset.srcset;
+            lazyImage.classList.remove("lazy");
+
+            lazyImages = lazyImages.filter(function(image) {
+              return image !== lazyImage;
+            });
+
+            if (lazyImages.length === 0) {
+              document.removeEventListener("scroll", lazyLoad);
+              window.removeEventListener("resize", lazyLoad);
+              window.removeEventListener("orientationchange", lazyLoad);
+            }
+          }
+        });
+
+        active = false;
+      }, 200);
+    }
+  };
+
+  document.addEventListener("scroll", lazyLoad);
+  window.addEventListener("resize", lazyLoad);
+  window.addEventListener("orientationchange", lazyLoad);
 }
 
 /**
