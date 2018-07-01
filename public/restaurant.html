@@ -33,8 +33,11 @@
   <main id="maincontent">
     <!-- Beginning map -->
     <aside>
-      <section title="map with the locationo the selected resturant" id="map-container">
-        <div role="application" id="map"></div>
+      <section title="map with the location of the selected resturant" id="map-container">
+        <div role="application" id="map" onclick="PrivateContent.addMap()">
+          <img alt="load icon" id="mapPreload" src="imgs/circular-arrow.svg" height="50%"></img>
+          <p class="mapTextPlacehold">Map hidden by default. Press icon to load Map.</p>
+        </div>
       </section>
     </aside>
     <!-- End map -->

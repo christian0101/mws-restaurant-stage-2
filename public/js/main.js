@@ -12,6 +12,11 @@ document.addEventListener('DOMContentLoaded', (event) => {
   this._dbPromise = DBHelper.openDatabase();
   fetchNeighborhoods();
   fetchCuisines();
+  _showCachedRestaurants().then(() => {
+    if (self.restaurants.length === 0) {
+      updateRestaurants();
+    }
+  });
   this._toastsView = new Toast();
 });
 
@@ -84,22 +89,23 @@ window.initMap = () => {
     scrollwheel: false
   });
 
-  this._showCachedRestaurants().then(function() {
-    lazyLoad();
-    updateRestaurants();
-  })
-  //updateRestaurants();
+  if (self.restaurants) {
+    addMarkersToMap();
+  }
 }
 
 _showCachedRestaurants = () => {
   return this._dbPromise.then(function(db) {
-    if (!db) return;
+    if (!db || self.restaurants) {
+      return;
+    }
 
     let dbRestaurants = db.transaction('restaurants').objectStore('restaurants');
 
     return dbRestaurants.getAll().then(function(content) {
       resetRestaurants(content);
       fillRestaurantsHTML();
+      lazyLoad();
     });
   });
 }
@@ -108,6 +114,7 @@ _showCachedRestaurants = () => {
  * Update page and map for current restaurants.
  */
 updateRestaurants = () => {
+  console.log('updating');
   const cSelect = document.getElementById('cuisines-select');
   const nSelect = document.getElementById('neighborhoods-select');
 
@@ -186,7 +193,7 @@ fillRestaurantsHTML = (restaurants = self.restaurants) => {
   restaurants.forEach(restaurant => {
     ul.append(createRestaurantHTML(restaurant));
   });
-  addMarkersToMap();
+  //addMarkersToMap();
 }
 
 /**

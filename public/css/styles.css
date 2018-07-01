@@ -61,6 +61,21 @@ object, video {
   text-transform: uppercase;
 }
 
+#mapPreloadMain {
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+  padding-top: 76px;
+  cursor: pointer;
+}
+
+.mapTextPlacehold {
+  font-size: 16px;
+  margin-top: 30px;
+  margin-bottom: 30px;
+  text-shadow: 0px 1px 0px rgba(255,255,255,.5);
+}
+
 .toast {
   color: #fff;
   background: #323232;
@@ -193,6 +208,9 @@ img#logo {
   height: 400px;
   width: 100%;
   background-color: #ccc;
+  cursor: pointer;
+  line-height: 400px;
+  text-align: center;
 }
 
 /* ====================== Restaurant Filtering ====================== */
@@ -360,7 +378,7 @@ img#logo {
   color: #fff;
   display: inline-block;
   font-size: 11pt;
-  margin: 15px 15px 10px 15px;
+  margin: 15px;
   padding: 8px 30px 10px;
   text-align: center;
   text-decoration: none;
