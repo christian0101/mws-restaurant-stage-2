@@ -9,15 +9,10 @@ var markers = []
  */
 document.addEventListener('DOMContentLoaded', (event) => {
   DBHelper.registerServiceWorker();
-  this._dbPromise = DBHelper.openDatabase();
+  this._toastsView = new Toast();
   fetchNeighborhoods();
   fetchCuisines();
-  _showCachedRestaurants().then(() => {
-    if (self.restaurants.length === 0) {
-      updateRestaurants();
-    }
-  });
-  this._toastsView = new Toast();
+  updateRestaurants();
 });
 
 /**
@@ -94,27 +89,10 @@ window.initMap = () => {
   }
 }
 
-_showCachedRestaurants = () => {
-  return this._dbPromise.then(function(db) {
-    if (!db || self.restaurants) {
-      return;
-    }
-
-    let dbRestaurants = db.transaction('restaurants').objectStore('restaurants');
-
-    return dbRestaurants.getAll().then(function(content) {
-      resetRestaurants(content);
-      fillRestaurantsHTML();
-      lazyLoad();
-    });
-  });
-}
-
 /**
  * Update page and map for current restaurants.
  */
 updateRestaurants = () => {
-  console.log('updating');
   const cSelect = document.getElementById('cuisines-select');
   const nSelect = document.getElementById('neighborhoods-select');
 
@@ -130,7 +108,6 @@ updateRestaurants = () => {
       networkWarning();
     } else {
       resetRestaurants(restaurants);
-      _updateDB();
       fillRestaurantsHTML();
       lazyLoad();
     }
@@ -158,31 +135,6 @@ resetRestaurants = (restaurants) => {
   self.markers.forEach(m => m.setMap(null));
   self.markers = [];
   self.restaurants = restaurants;
-}
-
-/**
- * Add new restaurants from network.
- */
-_updateDB = (restaurants = self.restaurants) => {
-  this._dbPromise.then(function(db) {
-    if (!db) return;
-
-    var tx = db.transaction('restaurants', 'readwrite');
-    var store = tx.objectStore('restaurants');
-
-    restaurants.forEach(restaurant => {
-      store.put(restaurant);
-    });
-
-    // limit store to 30 items
-    store.index('by-date').openCursor(null, "prev").then(function(cursor) {
-      return cursor.advance(30);
-    }).then(function deleteRest(cursor) {
-      if (!cursor) return;
-      cursor.delete();
-      return cursor.continue().then(deleteRest);
-    });
-  });
 }
 
 /**

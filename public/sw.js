@@ -23,6 +23,7 @@ self.addEventListener('install', function(event) {
         './js/idb.js',
         './js/dbhelper.js',
         './favicon.ico',
+        './manifest.json',
         'https://fonts.googleapis.com/css?family=Roboto:300,400,500,700',
         'https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.css'
       ]);
@@ -86,7 +87,7 @@ self.addEventListener('fetch', function(event) {
       event.respondWith(servePage(event.request, index));
       return;
     }
-    if (requestUrl.pathname.endsWith("restaurant.html")) {
+    if (requestUrl.pathname.endsWith('restaurant.html')) {
       event.respondWith(serveRestuarantPage(event.request));
       return;
     }
@@ -125,8 +126,7 @@ function servePage(request, customUrl) {
      return response || networkFetch;
    });
  });
-}
-
+} 
 
 /**
  * Serve a photo with custom url that should match an existing cached photo,
@@ -134,7 +134,7 @@ function servePage(request, customUrl) {
  */
 function servePhoto(request) {
   var storageUrl = request.url.replace(/-\dx/, '');
-  
+
   return caches.open(contentImgsCache).then(function(cache) {
     return cache.match(storageUrl).then(function(response) {
       if (response) return response;

@@ -18,21 +18,56 @@ class DBHelper {
    * @param callback the callback function
    */
   static fetchRestaurants(callback) {
-    fetch(DBHelper.DATABASE_URL)
-    .then(response => response.json())
-    .then(data => callback(null, data))
-    .catch(e => callback(e, null));
+    DBHelper.openDatabase().then(function(db) {
+      if (!db) {
+        return;
+      }
+
+      let dbRestaurants = db.transaction('restaurants').objectStore('restaurants');
+
+      dbRestaurants.getAll().then(function(content) {
+        callback(null, content);
+
+        fetch(DBHelper.DATABASE_URL)
+        .then(response => response.json())
+        .then((data) => {
+          // update IDB only if content is different
+          if (JSON.stringify(data) !== JSON.stringify(content)) {
+            DBHelper._updateDB(data);
+          }
+          callback(null, data);
+        })
+        .catch(e => callback(e, null));
+      });
+    });
   }
 
   /**
    * Fetch a restaurant by its ID.
    */
   static fetchRestaurantById(id, callback) {
-    // fetch restaurant specified by id.
-    fetch(`${DBHelper.DATABASE_URL}/${id}`)
-    .then(response => response.json())
-    .then(data => callback(null, data))
-    .catch(e => callback('Restaurant does not exist or Connection issues', null));
+    DBHelper.openDatabase().then(function(db) {
+      if (!db) {
+        return;
+      }
+
+      let dbRestaurants = db.transaction('restaurants').objectStore('restaurants');
+      const restaurantID = parseInt(id);
+
+      dbRestaurants.get(restaurantID).then(function(content) {
+        callback(null, content);
+
+        fetch(`${DBHelper.DATABASE_URL}/${restaurantID}`)
+        .then(response => response.json())
+        .then((data) => {
+          if (!content) {
+            DBHelper._updateDB(data);
+          }
+          callback(null, data);
+        })
+        .catch(e => callback('Restaurant does not exist or Connection issues', null));
+      });
+    });
   }
 
   /**
@@ -194,6 +229,33 @@ class DBHelper {
         keyPath: 'id'
       });
       store.createIndex('by-date', 'createdAt');
+    });
+  }
+
+  /**
+   * Add new restaurants from network.
+   */
+  static _updateDB(data) {
+    DBHelper.openDatabase().then(function(db) {
+      if (!db) return;
+
+      var tx = db.transaction('restaurants', 'readwrite');
+      var store = tx.objectStore('restaurants');
+
+      let restaurants = [].concat(data);
+
+      restaurants.forEach(restaurant => {
+        store.put(restaurant);
+      });
+
+      // limit store to 30 items
+      store.index('by-date').openCursor(null, "prev").then(function(cursor) {
+        return cursor.advance(30);
+      }).then(function deleteRest(cursor) {
+        if (!cursor) return;
+        cursor.delete();
+        return cursor.continue().then(deleteRest);
+      });
     });
   }
 

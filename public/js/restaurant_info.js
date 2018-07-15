@@ -43,39 +43,17 @@ fetchRestaurantFromURL = (callback) => {
     error = 'No restaurant id in URL'
     callback(error, null);
   } else {
-    this._showCachedRestaurant(id).catch(err => {
-      DBHelper.fetchRestaurantById(id, (error, restaurant) => {
-        self.restaurant = restaurant;
-        if (!restaurant) {
-          console.error(error);
-          noRestuarant(error);
-          return;
-        }
-        fillRestaurantHTML();
-        callback(null, restaurant)
-      });
+    DBHelper.fetchRestaurantById(id, (error, restaurant) => {
+      self.restaurant = restaurant;
+      if (!restaurant) {
+        console.error(error);
+        noRestuarant(error);
+        return;
+      }
+      fillRestaurantHTML();
+      callback(null, restaurant)
     });
   }
-}
-
-/**
- * Display resturant from idb.
- */
-_showCachedRestaurant = (id) => {
-  return this._dbPromise.then(function(db) {
-    // if we're already showing posts, eg shift-refresh
-    // or the very first load, there's no point fetching
-    // posts from IDB
-    if (!db) return;
-
-    let restaurnats = db.transaction('restaurants').objectStore('restaurants');
-    const key = parseInt(id);
-
-    return restaurnats.get(key).then(function(item) {
-      self.restaurant = item;
-      fillRestaurantHTML();
-    });
-  });
 }
 
 /**
