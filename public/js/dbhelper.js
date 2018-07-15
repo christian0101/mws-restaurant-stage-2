@@ -55,17 +55,17 @@ class DBHelper {
       const restaurantID = parseInt(id);
 
       dbRestaurants.get(restaurantID).then(function(content) {
-        callback(null, content);
-
-        fetch(`${DBHelper.DATABASE_URL}/${restaurantID}`)
-        .then(response => response.json())
-        .then((data) => {
-          if (!content) {
+        if (content) {
+          callback(null, content);
+        } else {
+          fetch(`${DBHelper.DATABASE_URL}/${restaurantID}`)
+          .then(response => response.json())
+          .then((data) => {
             DBHelper._updateDB(data);
-          }
-          callback(null, data);
-        })
-        .catch(e => callback('Restaurant does not exist or Connection issues', null));
+            callback(null, data);
+          })
+          .catch(e => callback('Restaurant does not exist or Connection issues', null));
+        }
       });
     });
   }
