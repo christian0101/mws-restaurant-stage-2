@@ -52,6 +52,7 @@ object, video {
 	border: 0;
 }
 #footer {
+  clear: both;
   background-color: #444;
   color: #b1b1b1;
   font-size: 9pt;
@@ -67,6 +68,25 @@ object, video {
   display: block;
   padding-top: 76px;
   cursor: pointer;
+}
+
+#mapPreloadRestaurant {
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+  cursor: pointer;
+}
+
+@media screen and (max-width: 1023px) {
+  #mapPreloadRestaurant {
+    padding-top: 52px;
+  }
+}
+
+@media screen and (min-width: 1024px) {
+  #mapPreloadRestaurant {
+    padding-top: 154.75px;
+  }
 }
 
 .mapTextPlacehold {
@@ -211,7 +231,6 @@ img#logo {
   width: 100%;
   background-color: #ccc;
   cursor: pointer;
-  line-height: 400px;
   text-align: center;
 }
 

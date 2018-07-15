@@ -126,7 +126,7 @@ function servePage(request, customUrl) {
      return response || networkFetch;
    });
  });
-} 
+}
 
 /**
  * Serve a photo with custom url that should match an existing cached photo,

@@ -6,8 +6,8 @@ var map;
  */
 document.addEventListener('DOMContentLoaded', (event) => {
   DBHelper.registerServiceWorker();
-  this._dbPromise = DBHelper.openDatabase();
-  PrivateContent.addMap();
+  this._toastsView = new Toast();
+  fetchRestaurantFromURL();
 });
 
 
@@ -15,66 +15,48 @@ document.addEventListener('DOMContentLoaded', (event) => {
  * Initialize Google map, called from HTML.
  */
 window.initMap = () => {
-  fetchRestaurantFromURL((error, restaurant) => {
-    if (error) { // Got an error!
-      console.error(error);
-    } else {
-      self.map = new google.maps.Map(document.getElementById('map'), {
-        zoom: 16,
-        center: restaurant.latlng,
-        scrollwheel: false
-      });
-      fillBreadcrumb();
-      DBHelper.mapMarkerForRestaurant(self.restaurant, self.map);
-    }
-  });
+  if (self.restaurant) {
+    self.map = new google.maps.Map(document.getElementById('map'), {
+      zoom: 16,
+      center: self.restaurant.latlng,
+      scrollwheel: false
+    });
+    DBHelper.mapMarkerForRestaurant(self.restaurant, self.map);
+  }
 }
 
 /**
  * Get current restaurant from page URL.
  */
-fetchRestaurantFromURL = (callback) => {
+fetchRestaurantFromURL = () => {
   if (self.restaurant) { // restaurant already fetched!
-    callback(null, self.restaurant)
+    //callback(null, self.restaurant)
     return;
   }
   const id = getParameterByName('id');
   if (!id) { // no id found in URL
     error = 'No restaurant id in URL'
-    callback(error, null);
+    //callback(error, null);
   } else {
     DBHelper.fetchRestaurantById(id, (error, restaurant) => {
       self.restaurant = restaurant;
       if (!restaurant) {
-        //console.error(error);
-        noRestuarant(error);
-        return;
+        self.restaurant = {};
+        const networkWarning = this._toastsView.create(error);
       }
       fillRestaurantHTML();
-      callback(null, restaurant)
+      Helper.lazyLoad();
+      //callback(null, restaurant)
     });
   }
-}
-
-/**
- * Restaurant not found.
- */
-noRestuarant = (err) => {
-  const breadcrumb = document.getElementById('breadcrumb');
-  const li = document.createElement('li');
-  li.setAttribute('aria-current', err)
-  li.innerHTML = err;
-  breadcrumb.appendChild(li);
-
-  const name = document.getElementById('restaurant-name');
-  name.innerHTML = err;
-  name.title = err;
 }
 
 /**
  * Create restaurant HTML and add it to the webpage
  */
 fillRestaurantHTML = (restaurant = self.restaurant) => {
+  fillBreadcrumb();
+
   const head = document.getElementsByTagName('head')[0];
   const description = document.createElement('meta');
   description.setAttribute('name', 'description');
@@ -89,21 +71,15 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
   address.innerHTML = restaurant.address;
   address.title = 'restaurant address';
 
-  const picture = document.getElementById('picure-element');
-  const sourceOne = document.createElement("SOURCE");
-  const sourceTwo = document.createElement("SOURCE");
-
+  const imgSrc = DBHelper.imageUrlForRestaurant(restaurant, true);
   const image = document.getElementById('restaurant-img');
-  picture.className = 'restaurant-img'
-  image.src = DBHelper.imageUrlForRestaurant(restaurant, 0);
-  image.alt = DBHelper.getPhotoDescription(restaurant);
-
-  sourceOne.media = '(min-width: 800px)';
-  sourceOne.srcset = DBHelper.imageUrlForRestaurant(restaurant, 2);
-  sourceTwo.media = '(max-width: 500px)';
-  sourceTwo.srcset = DBHelper.imageUrlForRestaurant(restaurant);
-  picture.insertBefore(sourceOne, image);
-  picture.insertBefore(sourceTwo, image);
+  image.className = 'restaurant-img';
+  image.classList.add('lazy');
+  image.src = imgSrc;
+  image.setAttribute('data-src', DBHelper.imageUrlForRestaurant(restaurant));
+  image.setAttribute('data-srcset', DBHelper.imageSRCSetUrlsForRestaurant(restaurant, ['1x', '2x']));
+  image.alt = (restaurant.photograph) ? DBHelper.getPhotoDescription(restaurant) :
+  'no picture found';
 
   const cuisine = document.getElementById('restaurant-cuisine');
   cuisine.innerHTML = restaurant.cuisine_type;
@@ -199,7 +175,7 @@ createReviewHTML = (review) => {
 fillBreadcrumb = (restaurant=self.restaurant) => {
   const breadcrumb = document.getElementById('breadcrumb');
   const li = document.createElement('li');
-  li.setAttribute('aria-current', restaurant.name)
+  li.setAttribute('aria-current', 'page')
   li.innerHTML = restaurant.name;
   breadcrumb.appendChild(li);
 }
