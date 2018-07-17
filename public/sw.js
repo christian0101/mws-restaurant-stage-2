@@ -20,7 +20,7 @@ self.addEventListener('install', function(event) {
         './js/main.js',
         './js/restaurant_info.js',
         './js/private.js',
-        './js/idb.js',
+        './idb.js',
         './js/dbhelper.js',
         './favicon.ico',
         './manifest.json',
